@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta
+      name="viewport"
+      content="initial-scale=1, width=device-width, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" href="css/index.css" />
+
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/ionic.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@ionic/core/css/ionic.bundle.css"
+    />
+    <script type="module">
+      import { toastController } from 'https://cdn.jsdelivr.net/npm/@ionic/core/dist/ionic/index.esm.js';
+        window.toastController = toastController;
+      import { modalController } from 'https://cdn.jsdelivr.net/npm/@ionic/core@latest/dist/ionic/index.esm.js';
+      window.modalController = modalController;
+    </script>
+    <title>MyRecipe</title>
+  </head>
+
+  <body>
+    <ion-app>
+      <ion-tabs>
+        <!--Home Page-->
+        <ion-tab tab="home">
+          <ion-header>
+            <ion-toolbar class="new-colour">
+              <ion-title>
+                <ion-icon name="restaurant-outline"></ion-icon> MyRecipes
+              </ion-title>
+              <ion-buttons slot="end">
+                <ion-button id="clearBtn">
+                  <ion-icon name="trash-outline" slot="start"></ion-icon>
+                  <ion-label>Clear</ion-label>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content>
+            <div id="recipes" class="ion-padding"></div>
+          </ion-content>
+        </ion-tab>
+
+        <!--Add Page-->
+        <ion-tab tab="add">
+          <ion-header>
+            <ion-toolbar class="new-colour">
+              <ion-title>
+                <ion-icon name="restaurant-outline"></ion-icon>
+                <ion-label>MyRecipes</ion-label>
+              </ion-title>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content>
+            <h2 class="ion-padding-start">New Recipe</h2>
+            <ion-list>
+              <ion-item>
+                <ion-label position="stacked">Recipe Name</ion-label>
+                <ion-input
+                  id="title"
+                  placeholder="Chicken Tikka Masala"
+                ></ion-input>
+              </ion-item>
+
+              <ion-item>
+                <ion-label position="stacked">Ingredients</ion-label>
+                <!-- https://stackoverflow.com/questions/7312623/insert-line-break-inside-placeholder-attribute-of-a-textarea -->
+                <ion-textarea
+                  rows="10"
+                  id="ingredients"
+                  placeholder="1 Onion
+2 Garlic
+Chicken Breast
+Cumin Seeds"
+                ></ion-textarea>
+              </ion-item>
+              <ion-item>
+                <ion-label>Type</ion-label>
+                <ion-select id="typeList" value="">
+                  <ion-select-option value="sunny-outline"
+                    >Breakfast</ion-select-option
+                  >
+                  <ion-select-option value="time-outline"
+                    >Lunch</ion-select-option
+                  >
+                  <ion-select-option value="moon-outline"
+                    >Dinner</ion-select-option
+                  >
+                  <ion-select-option value="cafe-outline"
+                    >Dessert</ion-select-option
+                  >
+                </ion-select>
+              </ion-item>
+
+              <ion-button
+                id="saveButton"
+                class="new-fab-colour ion-padding"
+                expand="full"
+              >
+                <ion-icon name="save-outline" slot="start"></ion-icon>
+                <ion-label>Save Recipe</ion-label>
+              </ion-button>
+            </ion-list>
+          </ion-content>
+        </ion-tab>
+
+        <!--About Page-->
+        <ion-tab tab="about">
+          <ion-header>
+            <ion-toolbar class="new-colour">
+              <ion-title>
+                <ion-icon name="restaurant-outline"></ion-icon>
+                <ion-label>MyRecipes</ion-label>
+              </ion-title>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content class="ion-padding">
+            <section class="content">
+              <img id="logo" height="100px" src="images/logo.png" />
+
+              <h4 class="h4" id="title">MyRecipes</h4>
+              <h6 class="h6">Eren Alp Kaptan</h6>
+              <p class="p">
+                Bored of the cooking the same four meals every week? We know the
+                feeling. Well, we did until we started researching and testing
+                the best recipe apps around, which we've handily boiled down
+                into the simple menu below. Why bother with a recipe app when
+                you've got a shelf full of inherited cookery books? Well, the
+                latest apps feature handy extras like step-by-step videos,
+                digital shopping lists and mouth-watering photography.
+              </p>
+            </section>
+          </ion-content>
+        </ion-tab>
+
+        <!--Tab Section-->
+        <ion-tab-bar slot="bottom">
+          <ion-tab-button tab="home">
+            <ion-icon name="restaurant-outline"></ion-icon>
+            <ion-label>Recipes</ion-label>
+          </ion-tab-button>
+
+          <ion-tab-button tab="add">
+            <ion-icon size="large" name="add-circle-outline"></ion-icon>
+            <ion-label>Add</ion-label>
+          </ion-tab-button>
+
+          <ion-tab-button tab="about">
+            <ion-icon size="large" name="information-circle-outline"></ion-icon>
+            <ion-label>About</ion-label>
+          </ion-tab-button>
+        </ion-tab-bar>
+      </ion-tabs>
+    </ion-app>
+
+    <script>
+      var button = document.querySelector("#saveButton");
+      button.addEventListener("click", handleButtonClick);
+
+      function saveRecipe(title, ingredients, type) {
+        // Parse any JSON previously stored in allEntries
+        var date = new Date();
+        var allRecipes = JSON.parse(localStorage.getItem("allRecipes"));
+        if (allRecipes == null) allRecipes = [];
+
+        var recipe = {
+          title: title,
+          ingredients: ingredients,
+          type: type,
+          icon: "star-outline",
+          date: date.toLocaleDateString(),
+          time: date.toLocaleTimeString(),
+          picture: ""
+        };
+
+        allRecipes.push(recipe);
+        localStorage.setItem("allRecipes", JSON.stringify(allRecipes));
+      }
+
+      function handleButtonClick() {
+        navigator.vibrate(1000)
+        const titleField = document.querySelector("#title");
+        const ingredientsField = document.querySelector("#ingredients");
+        const typeField = document.querySelector("#typeList");
+
+        var message,
+          buttons = null;
+
+        if (
+          titleField.value == "" ||
+          ingredientsField.value == "" ||
+          typeField.value == ""
+        ) {
+          navigator.vibrate(1000)
+          message = "Please fill in both the recipe name and the ingredients";
+          buttons = ["Ok"];
+        } else {
+          navigator.vibrate(1000)
+          message = "Are you sure you want to save this recipe?";
+          buttons = [
+            {
+              text: "Cancel",
+              role: "cancel",
+            },
+            {
+              text: "Ok",
+              handler: () => {
+                saveRecipe(
+                  titleField.value,
+                  ingredientsField.value,
+                  typeField.value
+                );
+
+                titleField.value = "";
+                ingredientsField.value = "";
+                typeField.value = "";
+
+                window.location.href = "index.html";
+              },
+            },
+          ];
+        }
+
+        const alert = document.createElement("ion-alert");
+        alert.header = "MyRecipes";
+        alert.message = message;
+        alert.buttons = buttons;
+
+        document.body.appendChild(alert);
+        return alert.present();
+      }
+
+      //second page
+      window.addEventListener("load", loadRecipes);
+
+      function loadRecipes() {
+        var item = JSON.parse(localStorage.getItem("allRecipes"));
+
+        document.getElementById("recipes").innerHTML = "";
+
+        if (item != null) {
+          var counter = 0;
+          for (var i = 0; i < item.length; i++) {
+
+            document.getElementById("recipes").innerHTML += `
+            
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>${item[i].title}</ion-card-title>
+                </ion-card-header>
+                <ion-card-content style="white-space: pre-line;">${item[i].ingredients}<br><ion-icon size="large" name="${item[i].type}"></ion-icon><br>
+                ${item[i].date} <br> ${item[i].time}
+                <ion-button id="${i}" color="warning" onclick="favorite(this.id)" fill="clear"><ion-icon size="large" name="${item[i].icon}"></ion-icon></ion-button><ion-button class="new-colour" onclick="delThis(${counter})" fill="clear"><ion-icon size="large" name="trash-outline"></ion-icon></ion-button>
+                <ion-button id="${i}" class="new-colour" onclick="onTakePic(this.id)"><ion-icon size="large" name="camera-outline"></ion-icon></ion-button><ion-button id="${i}" class="new-colour" onclick="openModal(this.id)"><ion-icon size="large" name="image-outline"></ion-icon></ion-button>
+                <img id="imageDis">
+                    </ion-card-content>
+            </ion-card>
+            `;
+            counter = counter + 1;
+          }
+        } else {
+          document.getElementById("recipes").innerHTML =
+            '<h4 class="ion-text-center">No recipes yet. Go on, add a new one!</h4>';
+        }
+      }
+      //Check if icon is star or outline
+      function favorite(item) {
+        var recipies = JSON.parse(localStorage.getItem("allRecipes"));
+
+        if (recipies[item].icon == "star-outline") {
+          recipies[item].icon = "star";
+          localStorage.setItem("allRecipes", JSON.stringify(recipies));
+          loadRecipes();
+        } else if (recipies[item].icon == "star") {
+          recipies[item].icon = "star-outline";
+          localStorage.setItem("allRecipes", JSON.stringify(recipies));
+          loadRecipes();
+        }
+      }
+      var clearBtn = document.querySelector("#clearBtn");
+      clearBtn.addEventListener("click", clearRecipes);
+
+      function clearRecipes() {
+        navigator.vibrate(1000)
+        var alert = document.createElement("ion-alert");
+
+        alert.header = "Delete all recipes?";
+        alert.message = "Are you sure you want to delete all recipes?";
+        alert.buttons = [
+          {
+            text: "No",
+            role: "cancel",
+          },
+          {
+            text: "Yes",
+            handler: () => {
+              localStorage.removeItem("allRecipes");
+              presentToast("All recipes were cleared");
+              loadRecipes();
+            },
+          },
+        ];
+
+        document.body.appendChild(alert);
+
+        return alert.present();
+      }
+      //When all recipes cleared message
+      function presentToast(message) {
+        const toast = document.createElement("ion-toast");
+        toast.message = message;
+        toast.duration = 5000;
+        toast.position = "bottom";
+
+        document.body.appendChild(toast);
+        return toast.present();
+      }
+      //Delete chosen card
+      function delThis(counter) {
+        var savedRecipes = JSON.parse(localStorage.getItem("allRecipes"));
+        if (savedRecipes.length > 1) {
+          savedRecipes.splice(counter, 1);
+          localStorage.setItem("allRecipes", JSON.stringify(savedRecipes));
+          loadRecipes();
+          return;
+        }
+        localStorage.removeItem("allRecipes");
+        loadRecipes();
+      }
+    </script>
+
+    <script src="cordova.js"></script>
+    <script src="js/index.js"></script>
+    <script src="js/dynamic.js"></script>
+  </body>
+</html>

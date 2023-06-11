@@ -1,0 +1,17 @@
+.new-colour {
+    --background: white;
+    color: #06c169;
+}
+
+.new-fab-colour {
+    --background:#06c169;
+    color: white;
+}
+#logo{
+    padding-left: 35%;
+    padding-top: 15px;
+}
+#title{
+    padding-left: 35%;
+    padding-bottom: 10px;
+}
